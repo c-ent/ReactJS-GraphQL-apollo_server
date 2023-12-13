@@ -15,11 +15,10 @@ const CREATE_TASK = gql`
     }
 `
 
-const AddTask = ({refetchTasks}) => {
+const AddTask = ({user,refetchTasks}) => {
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [userId, setUserId] = useState(1);
 
     const [createTask, { data, loading, error }] = useMutation(CREATE_TASK);
 
@@ -28,7 +27,7 @@ const AddTask = ({refetchTasks}) => {
           variables: {
             title,
             description,
-            user_id: userId,
+            user_id: user.id,
           },
         })
         ;
@@ -63,15 +62,6 @@ const AddTask = ({refetchTasks}) => {
         />
       </label>
       <br />
-      <label>
-        User ID:
-        <input
-          type="number"
-          value={userId}
-          onChange={(e) => setUserId(Number(e.target.value))}
-          className='border-2 border-black'
-        />
-      </label>
       <br />
       <button type="submit">Create</button>
     </form>

@@ -5,25 +5,32 @@ import AddTask from './AddTask'
 import { useTaskLists } from '../hooks/useTaskLists'
 import DeleteTask from './DeleteTask'
 import EditTask from './EditTask'
+import { useAuth } from '../hooks/AuthProvider'; // Import the useAuth hook
 
 export default function TaskList() {
+    const {user,handleLogout } = useAuth();
     const {error, data, loading, refetchTasks} = useTaskLists()
     if (loading) return <p>Loading...</p>
     if (error) return <p>error...</p>
+    
+    
 return (
     <div >
         <Search/>
-        <AddTask refetchTasks={refetchTasks} />
+        <AddTask user={user} refetchTasks={refetchTasks} />
+        <button onClick={handleLogout}>Logout</button>
         <table className='mx-auto border-collapse border border-black'>
   <thead>
     <tr>
       <th className='border p-1 border-black'>ID</th>
       <th className='border p-1 border-black'>Title</th>
       <th className='border p-1 border-black'>Description</th>
+      <th className='border p-1 border-black'>User_ID</th>
       <th className='border p-1 border-black'>Actions</th>
     </tr>
   </thead>
   <tbody>
+
     {data.tasks.map((task) => (
       <tr key={task.id}>
         <td className='border p-1 border-black text-blue-700'>
@@ -31,6 +38,7 @@ return (
         </td>
         <td className='border p-1 border-black'>{task.title}</td>
         <td className='border p-1 border-black'>{task.description}</td>
+        <td className='border p-1 border-black'>{task.user_id}</td>
         <td className='border p-1 border-black'>
             {/* EditTask component usage */}
             <EditTask
@@ -42,7 +50,6 @@ return (
             />
           </td>
         <td className='border p-1 border-black'> <DeleteTask id={task.id} refetchTasks={refetchTasks}/></td>
-       
       </tr>
     ))}
   </tbody>

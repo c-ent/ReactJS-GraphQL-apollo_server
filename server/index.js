@@ -1,5 +1,7 @@
 const { ApolloServer, gql } = require('apollo-server');
 const mysql = require('mysql');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 // MySQL connection
 const connection = mysql.createConnection({
@@ -23,6 +25,7 @@ const typeDefs = gql`
     id: Int
     name: String
     email: String
+    password: String
   }
 
   type Task {
@@ -35,21 +38,27 @@ const typeDefs = gql`
 
   type Query {
     users: [User]
-    tasks: [Task]
+    tasks(query: String, user_id: Int): [Task]
     searchUsers(query: String): [User]
-    searchTasks(query: String): [Task]
+
+  }
+
+  type AuthPayload {
+    token: String
+    user: User
   }
 
   type Mutation {
-    createUser(name: String!, email: String!): User
+    createUser(name: String!, email: String!, password:String!): User
     createTask(title: String!, description: String!, user_id: Int!): Task
     deleteTask(id: Int!): Task
     editTask(id: Int!, title: String, description: String, user_id: Int): Task
+    loginUser(email: String!, password: String!): AuthPayload
+    logoutUser: Boolean
   }
+
+
 `;
-
-
-// ... (existing code)
 
 // Resolvers
 const resolvers = {
@@ -65,9 +74,22 @@ const resolvers = {
           });
         });
       },
-      tasks: () => {
+      tasks: (_, { query, user_id }) => {
         return new Promise((resolve, reject) => {
-          connection.query('SELECT * FROM tasks', (err, results) => {
+          let queryCondition = '1'; // Default condition to return all tasks
+      
+          if (user_id) {
+            // If user_id is provided, filter tasks by user_id
+            queryCondition = `user_id = ${user_id}`;
+          }
+      
+          if (query) {
+            // If a search query is provided, add it to the condition
+            queryCondition += ` AND (LOWER(title) LIKE '%${query.toLowerCase()}%' OR LOWER(description) LIKE '%${query.toLowerCase()}%')`;
+          }
+      
+          // Perform the SQL query
+          connection.query(`SELECT * FROM tasks WHERE ${queryCondition}`, (err, results) => {
             if (err) {
               reject(err);
             } else {
@@ -76,52 +98,41 @@ const resolvers = {
           });
         });
       },
-      searchTasks: (_, { query }) => {
-        return new Promise((resolve, reject) => {
-          if (!query) {
-            // If no search query provided, return all tasks
-            connection.query('SELECT * FROM tasks', (err, results) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve(results);
-              }
-            });
-          } else {
-            // Perform a case-insensitive search on multiple columns
-            connection.query(
-              'SELECT * FROM tasks WHERE LOWER(title) LIKE ? OR LOWER(description) LIKE ?',
-              [`%${query.toLowerCase()}%`, `%${query.toLowerCase()}%`],
-              (err, results) => {
-                if (err) {
-                  reject(err);
-                } else {
-                  resolve(results);
-                }
-              }
-            );
-          }
-        });
-      },
-      
-  
     },
     Mutation: {
       createUser: (_, args) => {
         return new Promise((resolve, reject) => {
-          const { name, email } = args;
-          connection.query('INSERT INTO users (name, email) VALUES (?, ?)', [name, email], (err, results) => {
+          const { name, email, password } = args;
+          // Hash the password
+          bcrypt.hash(password, 10, (err, hashedPassword) => {
             if (err) {
               reject(err);
             } else {
-              // Fetch the newly created user
-              connection.query('SELECT * FROM users WHERE id = ?', [results.insertId], (err, user) => {
-                if (err) {
-                  reject(err);
-                } else {
-                  resolve(user[0]);
+              connection.query(
+                'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+                [name, email, hashedPassword],
+                (err, results) => {
+                  if (err) {
+                    reject(err);
+                  } else {
+                    connection.query(
+                      
+                      'SELECT * FROM users WHERE id = ?',
+                      [results.insertId],
+                      (err, user) => {
+                        if (err) {
+                          reject(err);
+                        } else {
+                          // const token = jwt.sign({ userId: user[0].id, email: user[0].email }, 'your-secret-key', {
+                          //   expiresIn: '1h', // Adjust the expiration time as needed
+                          // });
+                          resolve(user[0] );
+                        }
+                      }
+                    );
+                  }
                 }
-              });
+              );
             }
           });
         });
@@ -184,7 +195,45 @@ const resolvers = {
         });
       },
 
+      loginUser: async (_, { email, password }) => {
+        // Check if the user exists
+        const user = await new Promise((resolve, reject) => {
+          connection.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(results[0]);
+            }
+          });
+        });
+  
+        if (!user) {
+          throw new Error('User not found');
+        }
+  
+        // Compare the provided password with the hashed password in the database
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+  
+        if (!isPasswordValid) {
+          throw new Error('Invalid password');
+        }
+  
+        // Generate a JWT token
+        const token = jwt.sign({ userId: user.id, email: user.email }, 'your-secret-key', {
+          expiresIn: '1h', // Adjust the expiration time as needed
+        });
+  
+        return { token, user };
+      },
 
+      logoutUser: (_, __, { res }) => {
+        // Clear the token on the client side
+        res.clearCookie('token'); // Adjust based on your cookie implementation
+  
+        // Optionally, perform server-side actions such as session destruction or token revocation
+  
+        return true; // Indicate successful logout
+      },
     },
   };
   
@@ -192,7 +241,18 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  context: ({ req, res }) => {
+    const token = req.headers.authorization || '';
+
+    try {
+      const decodedToken = jwt.verify(token, '0tKjrcs0NH');
+      return { user: decodedToken, res };
+    } catch (error) {
+      return { res };
+    }
+  },
 });
+
 
 // Start the server
 server.listen().then(({ url }) => {

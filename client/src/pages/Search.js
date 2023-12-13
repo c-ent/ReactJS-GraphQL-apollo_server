@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { gql, useLazyQuery } from '@apollo/client';
 
 const SEARCH_TASKS = gql`
-  query SearchTasks($query: String!) {
-    searchTasks(query: $query) {
-      id
-      title
-      description
-      user_id
-    }
+  query Tasks($query: String!) {
+      tasks(query: $query) {
+        id
+        title
+        description
+        user_id
+      }
   }
 `;
 
@@ -36,7 +36,7 @@ const Search = () => {
       {error && <p>Error...</p>}
       {data && (
         <ul>
-          {data.searchTasks.map((task) => (
+          {data.tasks.map((task) => (
             <li key={task.id}>
               <strong>{task.title}</strong> - {task.description}
             </li>

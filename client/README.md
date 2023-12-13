@@ -72,3 +72,12 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 
 npm install
+npm install @apollo/server graphql
+npm install apollo-server
+
+npm install -D tailwindcss
+
+csss
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
