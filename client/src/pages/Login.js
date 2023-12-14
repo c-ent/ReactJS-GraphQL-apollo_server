@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { LOGIN_USER } from '../hooks/useLogin';
-import { useAuth } from '../hooks/AuthProvider'; // Import the useAuth hook
+import { useAuth } from '../hooks/useAuth'; // Import the useAuth hook
 import { Link } from 'react-router-dom';
 
 const Login = () => {
-  const { handleLogin } = useAuth(); // Use the useAuth hook to access authentication functions
-
+  const { handleLogin } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
   const [loginUser] = useMutation(LOGIN_USER, {
     onCompleted: (data) => {
       const token = data.loginUser.token;
       const user = data.loginUser.user;
-      // Use the handleLogin function from useAuth
-      console.log(token, user)
+      console.log(token, user);
       handleLogin({ token, user });
     },
   });
@@ -25,7 +22,6 @@ const Login = () => {
     try {
       await loginUser({ variables: { email, password } });
     } catch (error) {
-      // Handle login errors here
       console.error('Login failed:', error.message);
     }
   };

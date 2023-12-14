@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_USER } from '../hooks/useRegister'; // Replace with the actual path
 import { LOGIN_USER } from '../hooks/useLogin';
-import { useAuth } from '../hooks/AuthProvider'; // Import the useAuth hook
+import { useAuth } from '../hooks/useAuth'; // Import the useAuth hook
 import { Link } from 'react-router-dom';
 
 const CreateUser = () => {

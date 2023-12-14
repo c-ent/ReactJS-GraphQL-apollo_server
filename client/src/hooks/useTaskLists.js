@@ -1,5 +1,5 @@
 import { useQuery, gql } from '@apollo/client';
-import { useAuth } from '../hooks/AuthProvider';
+import { useAuth } from './useAuth';
 
 const GET_TASKS = gql`
   query Tasks($user_id: Int!) {

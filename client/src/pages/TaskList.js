@@ -1,10 +1,10 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import Search from './Search'
+import Search from '../components/Search'
 
 import { useTaskLists } from '../hooks/useTaskLists'
-import DeleteTask from './DeleteTask'
-import { useAuth } from '../hooks/AuthProvider'; // Import the useAuth hook
+import DeleteTask from '../components/DeleteTask'
+import { useAuth } from '../hooks/useAuth'; // Import the useAuth hook
 import EditModal from '../components/EditModal'
 import AddModal from '../components/AddModal'
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
@@ -14,6 +14,8 @@ export default function TaskList() {
     const {error, data, loading, refetchTasks} = useTaskLists()
     if (loading) return <p>Loading...</p>
     if (error) return <p>error...</p>
+
+
 return (
 <div className='mx-auto w-96 p-8 bg-white rounded-md shadow-md'>
   <div className='flex justify-between items-center mb-4'>
