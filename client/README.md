@@ -76,7 +76,7 @@ npm install @apollo/server graphql
 npm install apollo-server
 
 npm install -D tailwindcss
-
+npm install @mui/material @mui/styled-engine-sc styled-components
 csss
 @tailwind base;
 @tailwind components;

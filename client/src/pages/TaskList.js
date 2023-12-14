@@ -1,59 +1,56 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import Search from './Search'
-import AddTask from './AddTask'
+
 import { useTaskLists } from '../hooks/useTaskLists'
 import DeleteTask from './DeleteTask'
-import EditTask from './EditTask'
 import { useAuth } from '../hooks/AuthProvider'; // Import the useAuth hook
+import EditModal from '../components/EditModal'
+import AddModal from '../components/AddModal'
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 
 export default function TaskList() {
     const {user,handleLogout } = useAuth();
     const {error, data, loading, refetchTasks} = useTaskLists()
     if (loading) return <p>Loading...</p>
     if (error) return <p>error...</p>
-    
-    
 return (
-    <div >
-        <Search/>
-        <AddTask user={user} refetchTasks={refetchTasks} />
-        <button onClick={handleLogout}>Logout</button>
-        <table className='mx-auto border-collapse border border-black'>
-  <thead>
-    <tr>
-      <th className='border p-1 border-black'>ID</th>
-      <th className='border p-1 border-black'>Title</th>
-      <th className='border p-1 border-black'>Description</th>
-      <th className='border p-1 border-black'>User_ID</th>
-      <th className='border p-1 border-black'>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-
+<div className='mx-auto w-96 p-8 bg-white rounded-md shadow-md'>
+  <div className='flex justify-between items-center mb-4'>
+    <p className='font-semibold'>Hi, {user.name}</p>
+    <button onClick={handleLogout} className='bg-[#00A896] rounded-md text-white px-1'>
+      <LogoutOutlinedIcon/>
+    </button>
+  </div>
+  <div className='flex justify-between items-center'>
+    <p className='font-bold text-lg'>Tasks</p>
+    <AddModal user={user} refetchTasks={refetchTasks} />
+  </div>
+  <Search />
+  <ul className='mt-4'>
     {data.tasks.map((task) => (
-      <tr key={task.id}>
-        <td className='border p-1 border-black text-blue-700'>
-          <Link to={`/${task.id}`}>{task.id}</Link>
-        </td>
-        <td className='border p-1 border-black'>{task.title}</td>
-        <td className='border p-1 border-black'>{task.description}</td>
-        <td className='border p-1 border-black'>{task.user_id}</td>
-        <td className='border p-1 border-black'>
-            {/* EditTask component usage */}
-            <EditTask
+      <li key={task.id} className='border-b border-gray-200 py-2'>
+        <Link to={`/${task.id}`} className='text-blue-700'>
+          {task.title}
+        </Link>
+        <p className='text-gray-500 mt-1'>{task.description}</p>
+        <div className='flex justify-between items-center mt-2'>
+          <div className='text-gray-600'>{`User_ID: ${task.user_id}`}</div>
+          <div className='flex space-x-2'>
+            <EditModal
               taskId={task.id}
               initialTitle={task.title}
               initialDescription={task.description}
               initialUserId={task.user_id}
               refetchTasks={refetchTasks}
             />
-          </td>
-        <td className='border p-1 border-black'> <DeleteTask id={task.id} refetchTasks={refetchTasks}/></td>
-      </tr>
+            <DeleteTask id={task.id} refetchTasks={refetchTasks} />
+          </div>
+        </div>
+      </li>
     ))}
-  </tbody>
-</table>
-    </div>
+  </ul>
+</div>
+
   )
 }

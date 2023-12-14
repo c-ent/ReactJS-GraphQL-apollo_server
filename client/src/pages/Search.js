@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { gql, useLazyQuery } from '@apollo/client';
-
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 const SEARCH_TASKS = gql`
   query Tasks($query: String!) {
       tasks(query: $query) {
@@ -22,15 +22,20 @@ const Search = () => {
 
 
   return (
-    <div>
+    <div >
+      <div className='flex my-2 space-x-2'>
       <input
         type="text"
         value={searchQuery}
         onChange={(e) => {
           setSearchQuery(e.target.value);
         }}
+        className='w-full border border-black rounded-md'
+       
       />
-      <button onClick={() => getTasks()}>Search</button>
+      <button onClick={() => getTasks()}><SearchOutlinedIcon/></button>
+      </div>
+    
 
       {loading && <p>Loading...</p>}
       {error && <p>Error...</p>}
