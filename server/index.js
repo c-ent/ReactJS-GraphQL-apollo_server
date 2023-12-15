@@ -1,8 +1,11 @@
-require('dotenv').config();
-const { ApolloServer, gql } = require('apollo-server');
-const mysql = require('mysql');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+import dotenv from 'dotenv';
+import { ApolloServer } from '@apollo/server';
+import { startStandaloneServer } from '@apollo/server/standalone';
+import mysql from 'mysql';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+
+dotenv.config();
 
 // MySQL connection
 const connection = mysql.createConnection({
@@ -23,7 +26,7 @@ connection.connect((err) => {
 });
 
 // GraphQL schema
-const typeDefs = gql`
+const typeDefs = `#graphql
   type User {
     id: Int
     name: String
@@ -300,7 +303,8 @@ const server = new ApolloServer({
 });
 
 
-// Start the server
-server.listen().then(({ url }) => {
-  console.log(`Server running at ${url}`);
+const { url } = await startStandaloneServer(server, {
+  listen: { port: 4000 },
 });
+
+console.log(`🚀  Server ready at: ${url}`);
