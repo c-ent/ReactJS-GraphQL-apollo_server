@@ -27,35 +27,22 @@ const AddModal = ({user,refetchTasks}) => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const [createTask, { data, loading, error }] = useMutation(CREATE_TASK);
+  const [createTask, { error }] = useMutation(CREATE_TASK);
 
-  const handleCreateTask = () => {
-      createTask({
+  const handleCreateTask = async () => {
+    try {
+      await createTask({
         variables: {
           title,
           description,
           user_id: user.id,
         },
-      })
-      ;
+      });
       handleClose();
+      refetchTasks();
+    } catch (error) {
+      console.error(error);
     }
-   
-    refetchTasks();;
- 
-  //
-
-  const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    boxShadow: 24,
-    pt: 2,
-    px: 4,
-    pb: 3,
   };
   return (
     <>
@@ -70,7 +57,7 @@ const AddModal = ({user,refetchTasks}) => {
             width={400} 
             boxShadow={24} pt={2} px={4} pb={3}
           >
-
+{error && <p className="text-red-500">{error.message}</p>}
             <form onSubmit={(e) => {e.preventDefault();handleCreateTask();}} className='flex-col' >
                 <div>
                     <p>Task Title</p>
@@ -91,7 +78,7 @@ const AddModal = ({user,refetchTasks}) => {
                         className='border-2 border-black'
                     />
                 </div>
-
+               
                 <button type="submit">Create</button>
             </form>
 

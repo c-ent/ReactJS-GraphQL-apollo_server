@@ -6,35 +6,31 @@ import { useAuth } from '../hooks/useAuth'; // Import the useAuth hook
 import { Link } from 'react-router-dom';
 
 const CreateUser = () => {
-  const { handleLogin } = useAuth(); // Use the useAuth hook to access authentication functions
-
+  const { handleLogin } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const [createUser] = useMutation(CREATE_USER);
+  const [createUser, { loading, error }] = useMutation(CREATE_USER);
+  const [loginUser] = useMutation(LOGIN_USER);
 
   const handleCreateUserSubmit = async (e) => {
     e.preventDefault();
     try {
       await createUser({ variables: { name, email, password } });
-      await loginUser({ variables: { email, password } });
-    } catch (error) {
-      console.error('User creation failed:', error.message);
-    }
-  };
-
-
-  const [loginUser] = useMutation(LOGIN_USER, {
-    onCompleted: (data) => {
+      const { data } = await loginUser({ variables: { email, password } });
       const token = data.loginUser.token;
       const user = data.loginUser.user;
       handleLogin({ token, user });
-    },
-  });
+    } catch (err) {
+      // console.error(err);
+    }
+  };
 
   return (
     <div className='mx-auto w-80  flex flex-col items-center justify-center h-screen'>
+       {loading && <p className="text-blue-500">Loading...</p>}
+        {error && <p className="text-red-500">{error.message}</p>}
     <form onSubmit={handleCreateUserSubmit} className=' w-full flex flex-col'>
         <div className='flex mx-auto'>
           <h2 className='text-2xl mb-4 text-[#00352F] font-bold'>Register</h2>

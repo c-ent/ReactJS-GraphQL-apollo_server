@@ -12,6 +12,7 @@ const connection = mysql.createConnection({
   database: process.env.DB_NAME,
 });
 
+// MySQL connection check
 connection.connect((err) => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
@@ -105,44 +106,87 @@ const resolvers = {
       createUser: (_, args) => {
         return new Promise((resolve, reject) => {
           const { name, email, password } = args;
-          // Hash the password
-          bcrypt.hash(password, 10, (err, hashedPassword) => {
-            if (err) {
-              reject(err);
-            } else {
-              connection.query(
-                'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-                [name, email, hashedPassword],
-                (err, results) => {
+      
+          // Validate name
+          const nameRegex = /^[a-zA-Z\s]*$/;
+          if ( !nameRegex.test(name)) {
+            reject(new Error('Name must contain only letters and spaces'));
+            return;
+          }
+      
+          // Validate email
+          const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
+          if (!email || !emailRegex.test(email)) {
+            reject(new Error('Invalid email'));
+            return;
+          }
+      
+          // Validate password
+          if (!password || password.length < 8) {
+            reject(new Error('Password must be at least 8 characters long'));
+            return;
+          }
+      
+          // Check if email already exists
+          connection.query(
+            'SELECT * FROM users WHERE email = ?',
+            [email],
+            (err, results) => {
+              if (err) {
+                reject(err);
+              } else if (results.length > 0) {
+                reject(new Error('Email already in use'));
+              } else {
+                // Hash the password
+                bcrypt.hash(password, 10, (err, hashedPassword) => {
                   if (err) {
                     reject(err);
                   } else {
                     connection.query(
-                      
-                      'SELECT * FROM users WHERE id = ?',
-                      [results.insertId],
-                      (err, user) => {
+                      'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+                      [name, email, hashedPassword],
+                      (err, results) => {
                         if (err) {
                           reject(err);
                         } else {
-                          // const token = jwt.sign({ userId: user[0].id, email: user[0].email }, 'your-secret-key', {
-                          //   expiresIn: '1h', // Adjust the expiration time as needed
-                          // });
-                          resolve(user[0] );
+                          connection.query(
+                            'SELECT * FROM users WHERE id = ?',
+                            [results.insertId],
+                            (err, user) => {
+                              if (err) {
+                                reject(err);
+                              } else {
+                                resolve(user[0]);
+                              }
+                            }
+                          );
                         }
                       }
                     );
                   }
-                }
-              );
+                });
+              }
             }
-          });
+          );
         });
       },
       createTask: (_, args) => {
         return new Promise((resolve, reject) => {
-          const { title, description,user_id } = args;
-          connection.query('INSERT INTO tasks (title, description,user_id) VALUES (?, ?,?)', [title, description,user_id], (err, results) => {
+          const { title, description, user_id } = args;
+      
+          // Validate title
+          if (!title || title.trim().length === 0) {
+            reject(new Error('Title cannot be empty'));
+            return;
+          }
+      
+          // Validate description
+          if (!description || description.trim().length === 0) {
+            reject(new Error('Description cannot be empty'));
+            return;
+          }
+      
+          connection.query('INSERT INTO tasks (title, description, user_id) VALUES (?, ?, ?)', [title, description, user_id], (err, results) => {
             if (err) {
               reject(err);
             } else {
