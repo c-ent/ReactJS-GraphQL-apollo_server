@@ -20,7 +20,6 @@ const CreateUser = () => {
       await createUser({ variables: { name, email, password } });
       await loginUser({ variables: { email, password } });
     } catch (error) {
-      // Handle createUser errors here
       console.error('User creation failed:', error.message);
     }
   };
@@ -34,17 +33,12 @@ const CreateUser = () => {
     },
   });
 
-
-
   return (
-
     <div className='mx-auto w-80  flex flex-col items-center justify-center h-screen'>
     <form onSubmit={handleCreateUserSubmit} className=' w-full flex flex-col'>
-
         <div className='flex mx-auto'>
           <h2 className='text-2xl mb-4 text-[#00352F] font-bold'>Register</h2>
         </div>
-
         <div className='pb-3'>
           <p className='text-[#00352F] font-semibold'>Name</p>
           <input
@@ -65,7 +59,6 @@ const CreateUser = () => {
             className='border p-2 mr-2 w-full border-[#00352F] rounded-md'
           />
         </div>
-
         <div className='pb-5' >
         <p className='text-[#00352F] font-semibold'>Password</p>
           <input
@@ -77,8 +70,8 @@ const CreateUser = () => {
           />
         </div>
         <button type="submit" className='bg-[#00A896] rounded-full text-white p-2 '>Register</button>
-  
     </form>
+
     <Link to="/login" className='text-[#00A896] font-semibold'>Login</Link>
   </div>
     

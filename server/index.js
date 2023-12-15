@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { ApolloServer, gql } = require('apollo-server');
 const mysql = require('mysql');
 const jwt = require('jsonwebtoken');
@@ -5,15 +6,16 @@ const bcrypt = require('bcrypt');
 
 // MySQL connection
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'apolloserver',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
 });
 
 connection.connect((err) => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
+    process.exit(1);
   } else {
     console.log('Connected to MySQL database');
   }
