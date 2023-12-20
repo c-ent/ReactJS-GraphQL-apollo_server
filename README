@@ -1,47 +1,47 @@
-## SERVER SIDE CONFIGURATION
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
 ### Prerequisites
 
 You need to have Node.js and npm installed on your machine. Also, you need a MySQL server running either locally or remotely.
 
-### Installing
+## SERVER
 
 1. Clone the repository
-2. Install the dependencies using `npm install`
-3. Install the required libraries with the following commands:
-   npm install dotenv
-   npm install apollo-server
-   npm install mysql
-   npm install jsonwebtoken
-   npm install bcrypt
-4. Create a `.env` file at the root of your project and add the following variables:
+2. Open the project
+3. run command `cd server`
+4. Once inisde the server
+5. Run `npm intsall`
+6. Create a `.env` file and add the following variables:
    - `DB_HOST`: Your MySQL host
    - `DB_USER`: Your MySQL user
    - `DB_PASS`: Your MySQL password
    - `DB_NAME`: Your MySQL database name
-5. Database Schema
-The project includes two tables, `users` and `tasks`. Here are the SQL commands that create these tables:
+7. Go to Create a new database name `apolloserver`
+8. Run SQL commannd inside the database
 
-```sql
-CREATE TABLE IF NOT EXISTS users (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL
-);
+  ```sql
+  CREATE TABLE IF NOT EXISTS users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL
+  );
 
-CREATE TABLE IF NOT EXISTS tasks (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  title VARCHAR(255) NOT NULL,
-  description TEXT,
-  user_id INT,
-  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
-```
+  CREATE TABLE IF NOT EXISTS tasks (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    user_id INT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
+  ```
 
-6. Inside the server folder run the server using `node index.js`
+9. run `npm start`
+
+## CLIENT
+
+1. go to client folder using command cd client
+2. Install the dependencies using `npm install`
+3. run `npm start`
 
 ## File Structure
 
@@ -92,52 +92,3 @@ The file also defines a GraphQL schema with a `User` type. The `User` type has f
 - [MySQL](https://www.mysql.com/)
 - [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)
 - [bcrypt](https://www.npmjs.com/package/bcrypt)
-
-## Authors
-
-- cent
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-### CLIENT SIDE CONFIG
-
-# Client-side for GraphQL Server
-
-This project is the client-side for a simple GraphQL server. It uses React for the frontend, Apollo Client for interacting with the GraphQL server, and React Router for routing.
-
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
-### Prerequisites
-
-You need to have Node.js and npm installed on your machine.
-
-### Installing
-
-1. Clone the repository
-2. Install the dependencies using the following commands:
-
-```bash
-npm install
-npm install @apollo/client
-npm install @apollo/server graphql
-npm install apollo-server
-npm install -D tailwindcss
-npm install @mui/material @mui/styled-engine-sc styled-components
-npm install @mui/icons-material
-npm install react-router-dom
-```
-
-3. Running the Application
-    Run the application using 
-    ```bash
-    npm start
-    ```
-
-### File Structure
-    index.js: This is the main file of the application. It sets up the Apollo Client and renders the main App component.
-    App.js: This is the main component of the application. It includes the routing for the application and renders the Login, Register, TaskList, and Profile pages.
-    index.css: This file includes global styles for the application.
